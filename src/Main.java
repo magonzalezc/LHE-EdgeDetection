@@ -1,5 +1,7 @@
 import java.awt.image.BufferedImage;
 
+import qmetrics.PSNR;
+
 public class Main {
 	
 	static int INTERPOLATED = 2048;
@@ -7,13 +9,14 @@ public class Main {
 	static int INTERPOLATED_WIDTH = INTERPOLATED;
 	static int INTERPOLATED_HEIGHT = INTERPOLATED;
 
-	static String PATH_IMAGE = "./img/lena_bw.bmp";
+	static String PATH_IMAGE = "./img/play.bmp";
 
 	public static int INTERPOLATION = 	InterpolationUtils.EDGE_INTERPOLATION1;
 	public static boolean EDGES_AT_SAME_TIME = false;
 
 	public static void main(String [ ] args)
 	{
+		double psnr;
 		Cache cache = new Cache();
 		cache.init();
 		
@@ -21,11 +24,46 @@ public class Main {
 		
 		Image img = new Image (bufferedImg); //Creates image model
 		ImageUtils.imgToInt(bufferedImg, img.YUV); //Fills original YUV array
+		
 				
 		//Luminance original image to file
 		ImageUtils.YUVtoBMP("./output_debug/orig_YUV_BN.bmp", img.width, img.height, 
 				img.YUV[0]);
-
+		
+		
+		//Filter original image
+		img.initFilteredImage(img.width, img.height);
+		Filter.filterScale3x(img, LHEUtils.LUMINANCE);
+		ImageUtils.YUVtoBMP("./output_img/Scale3x.bmp",img.width, img.height, img.YUV_filtered[LHEUtils.LUMINANCE]);
+		psnr=PSNR.printPSNR("./output_debug/orig_lena.bmp", "./output_img/Scale3x.bmp");
+		System.out.println("filtered image is ./output_img/Scale3x.bmp PSNR " + psnr);
+		
+		img.initFilteredImage(img.width, img.height);
+		Filter.filterSNN(img, img.YUV[LHEUtils.LUMINANCE], img.YUV_filtered[LHEUtils.LUMINANCE], 255);
+		ImageUtils.YUVtoBMP("./output_img/SNN.bmp",img.width, img.height, img.YUV_filtered[LHEUtils.LUMINANCE]);
+		psnr=PSNR.printPSNR("./output_debug/orig_lena.bmp", "./output_img/SNN.bmp");
+		System.out.println("filtered image is ./output_img/SNN.bmp PSNR " + psnr);
+		
+		img.initFilteredImage(img.width, img.height);
+		Filter.filterCascade(img,LHEUtils.LUMINANCE);
+		ImageUtils.YUVtoBMP("./output_img/Cascade.bmp",img.width, img.height, img.YUV_filtered[LHEUtils.LUMINANCE]);
+		psnr=PSNR.printPSNR("./output_debug/orig_lena.bmp", "./output_img/Cascade.bmp");
+		System.out.println("filtered image is ./output_img/Cascade.bmp PSNR " + psnr);
+		
+		img.initFilteredImage(img.width, img.height);
+		Filter.filterMedian(img, LHEUtils.LUMINANCE);
+		ImageUtils.YUVtoBMP("./output_img/Median.bmp",img.width, img.height, img.YUV_filtered[LHEUtils.LUMINANCE]);
+		psnr=PSNR.printPSNR("./output_debug/orig_lena.bmp", "./output_img/Median.bmp");
+		System.out.println("filtered image is ./output_img/Median.bmp PSNR " + psnr);
+		
+		
+		img.initFilteredImage(img.width, img.height);
+		Filter.filterEPX(img, img.YUV[LHEUtils.LUMINANCE], img.YUV_filtered[LHEUtils.LUMINANCE]);
+		ImageUtils.YUVtoBMP("./output_img/EPX.bmp",img.width, img.height, img.YUV_filtered[LHEUtils.LUMINANCE]);
+		psnr=PSNR.printPSNR("./output_debug/orig_lena.bmp", "./output_img/EPX.bmp");
+		System.out.println("filtered image is ./output_img/EPX.bmp PSNR " + psnr);
+		
+		
 		//Compress basic frame
 		LHEUtils.compressBasicFrame(img); //compressBasic Frame
 		
@@ -53,7 +91,6 @@ public class Main {
 		//SAVING RESULTS AND DEBUG OUTPUT
 		
 		//Ready to save the result in BMP format
-		
 		System.out.println(" edges image is ./output_img/Edges.bmp");
 		ImageUtils.YUVtoBMP("./output_img/EdgesComplete.bmp",img.width, img.height, 
 				img.edges[LHEUtils.LUMINANCE]);

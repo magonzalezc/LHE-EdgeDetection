@@ -29,3 +29,8 @@ local.properties
 # Locally stored "Eclipse launch configurations"
 *.launch
 
+#Image and debug files
+output_debug/
+output_img/
+img/
+

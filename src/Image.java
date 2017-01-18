@@ -9,6 +9,9 @@ public class Image {
 	public int[][] YUV_result;// resulting luminance and chrominance components after 1st LHE encoding process
 	public int[][] YUV_resultHorizontal;// resulting luminance and chrominance components after 1st LHE encoding process
 	public int[][] YUV_resultVertical;// resulting luminance and chrominance components after 1st LHE encoding process
+	
+	public int[][] YUV_filtered;// resulting luminance and chrominance components after 1st LHE encoding process
+
 
 	public int[][] hops;// hops[0] is the hops of luminance, hops[1] and hops[2] are chrominance
 	public int[][] hopsHorizontal;// hops[0] is the hops of luminance, hops[1] and hops[2] are chrominance
@@ -50,5 +53,9 @@ public class Image {
 		hopsVertical=new int[3][width*height];
 		edgesPartial=new int[3][width*height];
 		edges=new int[3][width*height];
+	}
+	
+	public void initFilteredImage (int width, int height) {
+		YUV_filtered=new int[3][width*height];
 	}
 }
